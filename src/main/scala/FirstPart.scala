@@ -31,20 +31,20 @@ object FirstPart {
         .load(path).cache()
 
       //        1) Finding 1000 most active users (profile names)
-      data.groupBy("ProfileName").count().orderBy(desc("count")).limit(1000).select("ProfileName").show(1000)
+      data.groupBy("ProfileName").count().orderBy(desc("count")).limit(1000).select("ProfileName").orderBy("ProfileName").show(1000, truncate = false)
 
       //        2) Finding 1000 most commented food items (item ids).
-      data.groupBy("ProductId").count().orderBy(desc("count")).limit(1000).select("ProductId").show(1000)
+      data.groupBy("ProductId").count().orderBy(desc("count")).limit(1000).select("ProductId").orderBy("ProductId").show(1000)
 
       //        3) Finding 1000 most used words in the reviews
       val clean = udf { (text: Iterable[String]) =>
         val pattern = "[^{a-zA-Z }]"
-        text.map(str => str.replaceAll(pattern, " ").replaceAll(" +", " ").toLowerCase).toSeq
+        text.map(str => str.replaceAll(pattern, "").replaceAll(" +", " ").toLowerCase).toSeq
       }
 
       val rdd = data.select(clean(collect_list("Text"))).rdd.flatMap(r => r.getAs[Iterable[String]](0))
       val zipped = rdd.flatMap(r => r.split(" ")).map(r => r -> 1)
-      val result = zipped.reduceByKey(_ + _).toDF("word", "amount").orderBy(desc("amount")).limit(1000).select("word")
+      val result = zipped.reduceByKey(_ + _).toDF("word", "amount").orderBy(desc("amount")).limit(1000).select("word").orderBy("word")
       result.show(1000)
 
     } else {

@@ -85,5 +85,4 @@ object Runner extends JsonFormats {
       println("Please add review.csv path as agrument ")
     }
   }
-
 }
