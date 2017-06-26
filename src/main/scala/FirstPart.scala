@@ -5,6 +5,7 @@
 import org.apache.spark.SparkConf
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
+import org.apache.spark.storage.StorageLevel
 
 import scala.util.matching.Regex
 
@@ -28,7 +29,7 @@ object FirstPart {
       val data = spark
         .read
         .format("csv").option("header", true)
-        .load(path).cache()
+        .load(path).persist(StorageLevel.MEMORY_AND_DISK)
 
       //        1) Finding 1000 most active users (profile names)
       data.groupBy("ProfileName").count().orderBy(desc("count")).limit(1000).select("ProfileName").orderBy("ProfileName").show(1000, truncate = false)
@@ -44,7 +45,7 @@ object FirstPart {
 
       val rdd = data.select(clean(collect_list("Text"))).rdd.flatMap(r => r.getAs[Iterable[String]](0))
       val zipped = rdd.flatMap(r => r.split(" ")).map(r => r -> 1)
-      val result = zipped.reduceByKey(_ + _).toDF("word", "amount").orderBy(desc("amount")).limit(1000).select("word").orderBy("word")
+      val result = zipped.reduceByKey(_ + _).toDF("word", "amount").orderBy(desc("amount"), $"word").limit(1000).select("word")
       result.show(1000)
 
     } else {

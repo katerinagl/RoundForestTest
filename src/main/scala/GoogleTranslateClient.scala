@@ -17,7 +17,7 @@ import scala.util.{Failure, Success}
 /**
   * Created by katerinaglushchenko on 6/22/17.
   */
-object Runner extends JsonFormats {
+object GoogleTranslateClient extends JsonFormats {
   def main(args: Array[String]): Unit = {
     if (args.length == 1) {
       import scala.collection.JavaConversions._
